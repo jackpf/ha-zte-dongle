@@ -1,0 +1,12 @@
+{
+  "domain": "zte_dongle",
+  "name": "ZTE Dongle",
+  "codeowners": [],
+  "config_flow": true,
+  "documentation": "https://github.com/jackpf/ha-zte-dongle",
+  "integration_type": "device",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/jackpf/ha-zte-dongle/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
