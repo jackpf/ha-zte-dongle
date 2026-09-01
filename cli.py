@@ -8,6 +8,7 @@ import os
 import sys
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "custom_components"))
+sys.path.insert(0, "/config/custom_components")
 
 import aiohttp
 
@@ -32,11 +33,12 @@ async def cmd_disable(client: ZTEClient, target: str) -> dict:
 
 
 async def cmd_metrics(client: ZTEClient) -> dict:
-    return await client.get_params(*METRICS_PARAMS)
+    raw = await client.get_params(*METRICS_PARAMS.keys())
+    return {METRICS_PARAMS[k]: v for k, v in raw.items() if k in METRICS_PARAMS}
 
 
 async def run(args: argparse.Namespace) -> None:
-    async with aiohttp.ClientSession() as session:
+    async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
         client = ZTEClient(args.ip, args.password, session)
         await client.login()
 

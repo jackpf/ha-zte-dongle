@@ -28,7 +28,7 @@ class ZTEDongleConfigFlow(ConfigFlow, domain=DOMAIN):
             password = user_input[CONF_PASSWORD]
 
             try:
-                async with aiohttp.ClientSession() as session:
+                async with aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True)) as session:
                     client = ZTEClient(ip, password, session)
                     await client.login()
             except ZTEAuthError:

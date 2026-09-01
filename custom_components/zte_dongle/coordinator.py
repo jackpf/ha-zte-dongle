@@ -30,7 +30,7 @@ class ZTEDongleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         self._client: ZTEClient | None = None
 
     async def _async_setup(self) -> None:
-        self._session = aiohttp.ClientSession()
+        self._session = aiohttp.ClientSession(cookie_jar=aiohttp.CookieJar(unsafe=True))
         self._client = ZTEClient(self._ip, self._password, self._session)
         try:
             await self._client.login()
@@ -42,11 +42,17 @@ class ZTEDongleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             await self._async_setup()
 
         try:
-            return await self._client.get_params(*METRICS_PARAMS)
+            await self._client.login()
+            raw = await self._client.get_params(*METRICS_PARAMS.keys())
+            return {METRICS_PARAMS[k]: v for k, v in raw.items() if k in METRICS_PARAMS}
         except ZTEAuthError as err:
             raise ConfigEntryAuthFailed from err
         except (aiohttp.ClientError, OSError) as err:
             raise UpdateFailed(f"Error communicating with dongle: {err}") from err
+
+    async def async_command(self, goform_id: str, extra: dict | None = None) -> dict:
+        """Send an authenticated GoForm command."""
+        return await self._client.post_command(goform_id, extra)
 
     async def async_shutdown(self) -> None:
         if self._session:
