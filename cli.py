@@ -13,28 +13,7 @@ sys.path.insert(0, "/config/custom_components")
 import aiohttp
 
 from zte_dongle.client import ZTEClient
-from zte_dongle.const import DEFAULT_IP, METRICS_PARAMS
-
-
-async def cmd_enable(client: ZTEClient, target: str) -> dict:
-    if target == "cellular":
-        return await client.post_command("CONNECT_NETWORK")
-    return await client.post_command("SET_WIFI_INFO", {
-        "wifiEnabled": "1",
-        "m_ssid_enable": "0",
-        "lan_sec_ssid_control": "1",
-    })
-
-
-async def cmd_disable(client: ZTEClient, target: str) -> dict:
-    if target == "cellular":
-        return await client.post_command("DISCONNECT_NETWORK")
-    return await client.post_command("SET_WIFI_INFO", {"wifiEnabled": "0"})
-
-
-async def cmd_metrics(client: ZTEClient) -> dict:
-    raw = await client.get_params(*METRICS_PARAMS.keys())
-    return {METRICS_PARAMS[k]: v for k, v in raw.items() if k in METRICS_PARAMS}
+from zte_dongle.const import DEFAULT_IP
 
 
 async def run(args: argparse.Namespace) -> None:
@@ -43,11 +22,17 @@ async def run(args: argparse.Namespace) -> None:
         await client.login()
 
         if args.command == "enable":
-            result = await cmd_enable(client, args.target)
+            if args.target == "cellular":
+                result = await client.connect_cellular()
+            else:
+                result = await client.set_wifi(True)
         elif args.command == "disable":
-            result = await cmd_disable(client, args.target)
+            if args.target == "cellular":
+                result = await client.disconnect_cellular()
+            else:
+                result = await client.set_wifi(False)
         elif args.command == "metrics":
-            result = await cmd_metrics(client)
+            result = await client.fetch_metrics()
 
     print(json.dumps(result, indent=2))
 

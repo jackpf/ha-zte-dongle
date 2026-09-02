@@ -5,6 +5,8 @@ from typing import Any
 
 import aiohttp
 
+from .const import METRICS_PARAMS
+
 
 class ZTEAuthError(Exception):
     """Raised when login fails."""
@@ -95,3 +97,21 @@ class ZTEClient:
         ) as resp:
             resp.raise_for_status()
             return await resp.json(content_type=None)
+
+    async def connect_cellular(self) -> dict[str, Any]:
+        return await self.post_command("CONNECT_NETWORK")
+
+    async def disconnect_cellular(self) -> dict[str, Any]:
+        return await self.post_command("DISCONNECT_NETWORK")
+
+    async def set_wifi(self, enabled: bool) -> dict[str, Any]:
+        if enabled:
+            return await self.post_command(
+                "SET_WIFI_INFO",
+                {"wifiEnabled": "1", "m_ssid_enable": "0", "lan_sec_ssid_control": "1"},
+            )
+        return await self.post_command("SET_WIFI_INFO", {"wifiEnabled": "0"})
+
+    async def fetch_metrics(self) -> dict[str, Any]:
+        raw = await self.get_params(*METRICS_PARAMS.keys())
+        return {METRICS_PARAMS[k]: v for k, v in raw.items() if k in METRICS_PARAMS}

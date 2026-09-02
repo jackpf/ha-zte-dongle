@@ -60,11 +60,11 @@ class CellularSwitch(_ZTESwitch):
         return self.coordinator.data.get("ppp_status") == "ipv4_ipv6_connected"
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.coordinator.async_command("CONNECT_NETWORK")
+        await self.coordinator.async_connect_cellular()
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.coordinator.async_command("DISCONNECT_NETWORK")
+        await self.coordinator.async_disconnect_cellular()
         await self.coordinator.async_request_refresh()
 
 
@@ -88,15 +88,9 @@ class WiFiSwitch(_ZTESwitch):
         return None       # "2" = transitioning, unknow
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.coordinator.async_command(
-            "SET_WIFI_INFO",
-            {"wifiEnabled": "1", "m_ssid_enable": "0", "lan_sec_ssid_control": "1"},
-        )
+        await self.coordinator.async_set_wifi(True)
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.coordinator.async_command(
-            "SET_WIFI_INFO",
-            {"wifiEnabled": "0"},
-        )
+        await self.coordinator.async_set_wifi(False)
         await self.coordinator.async_request_refresh()

@@ -9,7 +9,7 @@ from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .client import ZTEAuthError, ZTEClient
-from .const import CONF_IP, CONF_PASSWORD, DOMAIN, METRICS_PARAMS, UPDATE_INTERVAL
+from .const import CONF_IP, CONF_PASSWORD, DOMAIN, UPDATE_INTERVAL
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,16 +43,20 @@ class ZTEDongleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         try:
             await self._client.login()
-            raw = await self._client.get_params(*METRICS_PARAMS.keys())
-            return {METRICS_PARAMS[k]: v for k, v in raw.items() if k in METRICS_PARAMS}
+            return await self._client.fetch_metrics()
         except ZTEAuthError as err:
             raise ConfigEntryAuthFailed from err
         except (aiohttp.ClientError, OSError) as err:
             raise UpdateFailed(f"Error communicating with dongle: {err}") from err
 
-    async def async_command(self, goform_id: str, extra: dict | None = None) -> dict:
-        """Send an authenticated GoForm command."""
-        return await self._client.post_command(goform_id, extra)
+    async def async_connect_cellular(self) -> dict:
+        return await self._client.connect_cellular()
+
+    async def async_disconnect_cellular(self) -> dict:
+        return await self._client.disconnect_cellular()
+
+    async def async_set_wifi(self, enabled: bool) -> dict:
+        return await self._client.set_wifi(enabled)
 
     async def async_shutdown(self) -> None:
         if self._session:
