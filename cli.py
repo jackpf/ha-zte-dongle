@@ -23,12 +23,12 @@ async def run(args: argparse.Namespace) -> None:
 
         if args.command == "enable":
             if args.target == "cellular":
-                result = await client.connect_cellular()
+                result = await client.set_cellular(True)
             else:
                 result = await client.set_wifi(True)
         elif args.command == "disable":
             if args.target == "cellular":
-                result = await client.disconnect_cellular()
+                result = await client.set_cellular(False)
             else:
                 result = await client.set_wifi(False)
         elif args.command == "metrics":

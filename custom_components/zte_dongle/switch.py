@@ -60,11 +60,11 @@ class CellularSwitch(_ZTESwitch):
         return self.coordinator.data.get("ppp_status") == "ipv4_ipv6_connected"
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self.coordinator.async_connect_cellular()
+        await self.coordinator.async_set_cellular(enabled=True)
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self.coordinator.async_disconnect_cellular()
+        await self.coordinator.async_set_cellular(enabled=False)
         await self.coordinator.async_request_refresh()
 
 

@@ -98,11 +98,8 @@ class ZTEClient:
             resp.raise_for_status()
             return await resp.json(content_type=None)
 
-    async def connect_cellular(self) -> dict[str, Any]:
-        return await self.post_command("CONNECT_NETWORK")
-
-    async def disconnect_cellular(self) -> dict[str, Any]:
-        return await self.post_command("DISCONNECT_NETWORK")
+    async def set_cellular(self, enabled: bool) -> dict[str, Any]:
+        return await self.post_command("CONNECT_NETWORK" if enabled else "DISCONNECT_NETWORK")
 
     async def set_wifi(self, enabled: bool) -> dict[str, Any]:
         if enabled:
