@@ -13,6 +13,7 @@ class ZTEAuthError(Exception):
 
 
 class ZTEClient:
+    _TIMEOUT = aiohttp.ClientTimeout(total=3)
     _HEADERS = {
         "Accept": "application/json, text/javascript, */*; q=0.01",
         "Accept-Encoding": "gzip, deflate",
@@ -45,6 +46,7 @@ class ZTEClient:
             f"{self._base_url}/goform/goform_get_cmd_process",
             params={"isTest": "false", "cmd": cmd, "multi_data": "1"},
             headers=self._headers,
+            timeout=self._TIMEOUT,
         ) as resp:
             resp.raise_for_status()
             return await resp.json(content_type=None)
@@ -58,6 +60,7 @@ class ZTEClient:
             f"{self._base_url}/goform/goform_set_cmd_process",
             headers={**self._headers, "Origin": self._base_url},
             data={"isTest": "false", "goformId": "LOGIN", "password": login_pass},
+            timeout=self._TIMEOUT,
         ) as resp:
             resp.raise_for_status()
             result = await resp.json(content_type=None)
@@ -94,6 +97,7 @@ class ZTEClient:
             f"{self._base_url}/goform/goform_set_cmd_process",
             headers={**self._headers, "Origin": self._base_url},
             data=payload,
+            timeout=self._TIMEOUT,
         ) as resp:
             resp.raise_for_status()
             return await resp.json(content_type=None)
