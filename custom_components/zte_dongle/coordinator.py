@@ -49,6 +49,9 @@ class ZTEDongleCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         except (aiohttp.ClientError, OSError) as err:
             raise UpdateFailed(f"Error communicating with dongle: {err}") from err
 
+    async def async_reboot(self) -> dict:
+        return await self._client.post_command("REBOOT_DEVICE")
+
     async def async_set_cellular(self, enabled: bool) -> dict:
         return await self._client.set_cellular(enabled)
 
